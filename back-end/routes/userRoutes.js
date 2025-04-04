@@ -32,3 +32,5 @@ router.post('/', async (req, res) => {
 // PUT
 
 // DELETE
+
+module.exports = router;
