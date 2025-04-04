@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next(); // In case the password hasn't changed, it doesn't hash it again.
     try{
-        const hashedPassword = bcrypt.hash(this.password, saltRounds);
+        const hashedPassword = await bcrypt.hash(this.password, saltRounds);
         this.password = hashedPassword;
         next();
     } catch (error){
