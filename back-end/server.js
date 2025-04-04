@@ -4,7 +4,7 @@ const app = express();
 
 connectDB();
 
-app.use(express.json())
+app.use(express.json());
 
 // Mount routes
 app.use('/api/users', require('./routes/userRoutes'));
