@@ -8,3 +8,5 @@ const userSchema = new mongoose.Schema({
     role: {type: Number, validate: {validator: Number.isInteger}, required: true},
     restaurantID: {type: Number, required: true}
 })
+
+module.exports = mongoose.model('User', userSchema);
