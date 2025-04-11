@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const { generateAccessToken, generateRefreshToken } = require('../lib/token');
 
 const getMe = async (req, res) => {
@@ -79,4 +80,30 @@ const signup = async (req, res) => {
     }
 };
 
-module.exports = {getMe, login, signup};
+const refreshToken = async (req, res) => {
+    try {
+        const token = req.cookies.refreshToken;
+        if (!token) return res.status(401).json({error: 'No refresh token provided.'});
+        jwt.verify(token, process.env.JWT_REFRESH_SECRET, async (error, decoded) => {
+            if (error) return res.status(403).json({ error: 'Invdalid refresh token.'});
+            const user = await User.findOne({id: decoded.id});
+            if (!user) return res.status(404).json({ error: 'User not found.'});     
+            const newAccessToken = generateAccessToken(user);
+            const newRefreshToken = generateRefreshToken(user);
+            res.cookie('accessToken', newAccessToken, {
+                httpOnly: true,
+                secure:true,
+                sameSite: 'Strict',
+                maxAge: 1000*60*60, //1h
+                }).cookie('refreshToken', newRefreshToken, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'Strict',
+                maxAge: 1000*60*60*24*30, //30d
+            }).status(200).json({message: 'Token refreshed'});
+        })} catch(error) {
+            console.error(error);
+    }
+}
+
+module.exports = {getMe, login, signup, refreshToken};

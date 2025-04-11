@@ -10,7 +10,7 @@ router.get('/me', authenticate, authController.getMe); //Only users authenticate
 // POST
 router.post('/login', authController.login);
 router.post('/signup', authController.signup);
-
+router.post('/refresh', authController.refreshToken);
 
 // PUT
 
