@@ -7,7 +7,7 @@ const User = require('../models/User');
 
 // POST
 router.post('/', async (req, res) => {
-    const {id, email, password, name, lastName, role, restaurantID} = req.body;
+    const {id, email, password, name, lastName, role, restaurantId} = req.body;
     
     try{
 
@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
             return res.status(400).json({error: "Only @unisabana.edu.co emails are allowed."});
         }
 
-        const newUser = new User({ id, email, password, name, lastName, role, restaurantID}); 
+        const newUser = new User({ id, email, password, name, lastName, role, restaurantId}); 
         await newUser.save(); //At this point the .pre('save') middleware is triggered
         res.status(201).json(newUser);
 

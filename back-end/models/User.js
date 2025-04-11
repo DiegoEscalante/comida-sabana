@@ -8,8 +8,8 @@ const userSchema = new mongoose.Schema({
     password: {type: String, required: true},
     name: {type: String, required: true},
     lastName: {type: String, required: true},
-    role: {type: Number, validate: {validator: Number.isInteger}, required: true},
-    restaurantID: {type: Number, required: true}
+    role: {type: String, required: true},
+    restaurantId: {type: Number, required: true}
 })
 
 // Hash password before saving
