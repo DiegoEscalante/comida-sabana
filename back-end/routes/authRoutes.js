@@ -32,9 +32,9 @@ router.post('/signup', async (req, res) => {
     
     try{
 
-        const existingUser = await User.findOne({email}); //Search for user with same email
+        const existingUser = await User.findOne({$or:[{email}, {id}]}); //Search for user with same email
         if (existingUser) {
-            return res.status(400).json({error: "The email is already in use."});
+            return res.status(400).json({error: "The email or id is already in use."});
         }
         if (!email.endsWith("@unisabana.edu.co")){
             return res.status(400).json({error: "Only @unisabana.edu.co emails are allowed."});
