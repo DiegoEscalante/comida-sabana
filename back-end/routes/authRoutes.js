@@ -56,6 +56,7 @@ router.post('/signup', async (req, res) => {
             maxAge: 1000*60*60*24*30, //30d
         }).status(201).json({message: 'Signup Successful', user:{id, email, name, lastName, role}});
     } catch(error){
+        console.error(error);
         res.status(500).json({ error: "Error creating user."});
 
     }
