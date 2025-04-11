@@ -2,6 +2,7 @@ require('dotenv').config(); //so that it can be loaded locally
 const express = require('express');
 const connectDB = require('./lib/connectDB')
 const app = express();
+const cookieParser = require('cookie-parser')
 
 if (require.main === module) {
     // Only run app.listen if this file is executed directly
@@ -14,6 +15,7 @@ if (require.main === module) {
 connectDB();
 
 app.use(express.json());
+app.use(cookieParser());
 
 // Mount routes
 app.use('/api/auth', require('./routes/authRoutes'));

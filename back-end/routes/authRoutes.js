@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const authenticate = require('../middlewares/authenticate');
 
 const generateAccessToken = (user) => {
     return jwt.sign(
@@ -25,7 +26,17 @@ const generateRefreshToken = (user) => {
 
 
 // GET
-
+router.get('/me', authenticate, async(req, res) => { //Only users authenticated can access
+    const user = req.user;
+    res.status(200).json({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        lastName: user.lastName,
+        role: user.role,
+        restaurantId: user.restaurantId
+    })
+})
 
 // POST
 router.post('/login', async(req, res) => {
