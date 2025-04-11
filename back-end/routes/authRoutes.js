@@ -27,6 +27,38 @@ const generateRefreshToken = (user) => {
 
 
 // POST
+router.post('/login', async(req, res) => {
+    const {email, password} = req.body;
+    try {
+        const user = await User.findOne({email}); //Checks if email exists
+        if (!user) return res.status(400).json({error: "Invalid credentials."});
+        const isMatch = await bcrypt.compare(password, user.password); //Checks if password matches the specified user password
+        if (!isMatch) return res.status(400).json({error: "Invalid credentials."});
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateAccessToken(user);
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure:true,
+            sameSite: 'Strict',
+            maxAge: 1000*60*60, //1h
+        }).cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict',
+            maxAge: 1000*60*60*24*30, //30d
+        }).status(200).json({message: 'Login successful', user:{
+            id: user.id, 
+            email: user.email, 
+            name: user.name, 
+            lastName: user.lastName, 
+            role: user.role, 
+            restaurantId: user.restaurantId}});
+    } catch(error){
+        console.error(error);
+    }
+})
+
+
 router.post('/signup', async (req, res) => {
     const {id, email, password, name, lastName, role, restaurantId} = req.body;
     
@@ -54,7 +86,7 @@ router.post('/signup', async (req, res) => {
             secure: true,
             sameSite: 'Strict',
             maxAge: 1000*60*60*24*30, //30d
-        }).status(201).json({message: 'Signup Successful', user:{id, email, name, lastName, role}});
+        }).status(201).json({message: 'Signup successful', user:{id, email, name, lastName, role, restaurantId}});
     } catch(error){
         console.error(error);
         res.status(500).json({ error: "Error creating user."});
