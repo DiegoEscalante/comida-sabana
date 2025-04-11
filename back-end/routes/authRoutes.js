@@ -36,7 +36,7 @@ router.post('/login', async(req, res) => {
         const isMatch = await bcrypt.compare(password, user.password); //Checks if password matches the specified user password
         if (!isMatch) return res.status(400).json({error: "Invalid credentials."});
         const accessToken = generateAccessToken(user);
-        const refreshToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user);
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure:true,
@@ -47,7 +47,7 @@ router.post('/login', async(req, res) => {
             secure: true,
             sameSite: 'Strict',
             maxAge: 1000*60*60*24*30, //30d
-        }).status(200).json({message: 'Login successful', user:{
+        }).status(200).json({message: 'Login successful.', user:{
             id: user.id, 
             email: user.email, 
             name: user.name, 
