@@ -106,4 +106,12 @@ const refreshToken = async (req, res) => {
     }
 }
 
-module.exports = {getMe, login, signup, refreshToken};
+const test = async (req, res) => {
+    try {
+        res.status(200).json('good to go');
+        } catch(error) {
+            console.error(error);
+    }
+}
+
+module.exports = {getMe, login, signup, refreshToken, test};
