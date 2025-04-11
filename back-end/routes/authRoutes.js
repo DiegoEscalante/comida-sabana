@@ -27,16 +27,17 @@ const generateRefreshToken = (user) => {
 
 // GET
 router.get('/me', authenticate, async(req, res) => { //Only users authenticated can access
-    const user = req.user;
-    res.status(200).json({
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        lastName: user.lastName,
-        role: user.role,
-        restaurantId: user.restaurantId
-    })
-})
+    try{
+        const user = await User.findOne({ id: req.user.id }).select('-password'); // exclude password
+        if (!user) {
+            return res.status(404).json({ error: 'User not found.'});
+        }
+        res.status(200).json(user);
+    } catch(error){
+        console.error(error);
+        res.status(500).json({error: 'Failed to fetch user data.'})
+    }
+});
 
 // POST
 router.post('/login', async(req, res) => {
