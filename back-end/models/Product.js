@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
+require('./Restaurant');
 
 const productSchema = new mongoose.Schema({
-    id: {type: Number, unique: true, validate: {validator: Number.isInteger}, required: true},
-    restaurantId: {type: Number, validate:{validator: Number.isInteger}, required: true},
+    restaurantId: {type: mongoose.Schema.Types.ObjectId,
+        ref: 'Restaurant', 
+        required: true},
     name: {type: String, required: true},
     description: {type: String, required: true},
     image: {type: String, required: true},
@@ -12,3 +14,4 @@ const productSchema = new mongoose.Schema({
     isAvailableForSale:{type: Boolean, required: true}
 });
 
+module.exports = mongoose.model('Product', productSchema);

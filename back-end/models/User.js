@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
+require('./Restaurant');
 
 const userSchema = new mongoose.Schema({
     email: {type: String, unique: true, required: true},
@@ -8,7 +9,9 @@ const userSchema = new mongoose.Schema({
     name: {type: String, required: true},
     lastName: {type: String, required: true},
     role: {type: String, required: true},
-    restaurantId: {type: mongoose.Schema.Types.ObjectID,
+    restaurantId: {
+        type: mongoose.Schema.Types.ObjectID,
+        ref: 'Restaurant',
         required: function(){
             return this.role === 'pos'; // Only required for 'pos' users
         },
