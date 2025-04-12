@@ -1,15 +1,18 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 
 const userSchema = new mongoose.Schema({
-    id: {type: Number, unique: true, validate: {validator: Number.isInteger}, required: true},
     email: {type: String, unique: true, required: true},
     password: {type: String, required: true},
     name: {type: String, required: true},
     lastName: {type: String, required: true},
     role: {type: String, required: true},
-    restaurantId: {type: Number, required: true}
+    restaurantId: {type: mongoose.Schema.Types.ObjectID,
+        required: function(){
+            return this.role === 'pos'; // Only required for 'pos' users
+        },
+    default: null}
 })
 
 // Hash password before saving

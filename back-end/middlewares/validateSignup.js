@@ -1,10 +1,6 @@
 const { body, validationResult } = require('express-validator');
 
 const validateSignup = [ // List of rules the controller has to follow
-    body('id')
-    .notEmpty().withMessage('ID is required')
-    .isInt().withMessage('ID must be a number'),
-
     body('email')
     .notEmpty().withMessage('Email is required')
     .isEmail().withMessage('Email must be valid')
