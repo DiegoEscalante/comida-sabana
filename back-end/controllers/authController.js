@@ -105,12 +105,12 @@ const refreshToken = async (req, res) => {
 
 const logout = async (res) => {
     try{
-        res.clearCookie('accessToken', newAccessToken, {
+        res.clearCookie('accessToken', {
             httpOnly: true,
             secure:true,
             sameSite: 'Strict',
             })
-            .clearCookie('refreshToken', newRefreshToken, {
+            .clearCookie('refreshToken', {
             httpOnly: true,
             secure: true,
             sameSite: 'Strict',
