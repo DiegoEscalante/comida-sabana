@@ -3,8 +3,6 @@ const router = express.Router();
 const authenticate = require('../middlewares/authenticate');
 const authorize = require('../middlewares/authorize');
 const getUniqueS3Url = require('../controllers/s3Controller');
-const authenticate = require('../middlewares/authenticate');
-const authorize = require('../middlewares/authorize');
 
 router.get("/get-url", authenticate, authorize('pos'), getUniqueS3Url);
 
