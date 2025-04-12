@@ -1,4 +1,4 @@
-require('dotenv').config(); //so that it can be loaded locally
+require('dotenv').config(); //so that the .env can be loaded locally
 const express = require('express');
 const connectDB = require('./lib/connectDB')
 const app = express();
