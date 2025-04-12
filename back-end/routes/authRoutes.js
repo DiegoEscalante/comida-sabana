@@ -12,6 +12,7 @@ router.get('/info', authenticate, authorize('client'), authController.test);
 router.post('/login', authController.login);
 router.post('/signup', validateSignup, authController.signup);
 router.post('/refresh', authController.refreshToken);
+router.post('/logout', authController.logout);
 
 // PUT
 

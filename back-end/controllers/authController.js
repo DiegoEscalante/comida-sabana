@@ -99,6 +99,26 @@ const refreshToken = async (req, res) => {
             }).status(200).json({message: 'Token refreshed'});
         })} catch(error) {
             console.error(error);
+            res.status(500).json({ error: 'Error refreshing tokens.'});
+    }
+}
+
+const logout = async (res) => {
+    try{
+        res.clearCookie('accessToken', newAccessToken, {
+            httpOnly: true,
+            secure:true,
+            sameSite: 'Strict',
+            })
+            .clearCookie('refreshToken', newRefreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict',
+            })
+            .status(204).json({message: 'Logout successful.'});
+    } catch(error){
+        console.error(error);
+        res.status(500).json({ error: 'Error loging out user.'})
     }
 }
 
@@ -110,4 +130,4 @@ const test = async (req, res) => {
     }
 }
 
-module.exports = {getMe, login, signup, refreshToken, test};
+module.exports = {getMe, login, signup, refreshToken, logout, test};
