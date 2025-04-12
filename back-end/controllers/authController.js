@@ -54,9 +54,6 @@ const signup = async (req, res) => {
         if (existingUser) {
             return res.status(400).json({error: "The email or id is already in use."});
         }
-        if (!email.endsWith("@unisabana.edu.co")){
-            return res.status(400).json({error: "Only @unisabana.edu.co emails are allowed."});
-        }
         // Every new user starts as client with no assigned restaurant. It can be changed in the database if user is pos.
         const newUser = new User({id, email, password, name, lastName, role: 'client', restaurantId: 0}); 
         await newUser.save(); //At this point the .pre('save') middleware is triggered
@@ -72,7 +69,7 @@ const signup = async (req, res) => {
             secure: true,
             sameSite: 'Strict',
             maxAge: 1000*60*60*24*30, //30d
-        }).status(201).json({message: 'Signup successful', user:{id, email, name, lastName, role, restaurantId}});
+        }).status(201).json({message: 'Signup successful', user:{id, email, name, lastName, role: 'client', restaurantId: 0}});
     } catch(error){
         console.error(error);
         res.status(500).json({ error: "Error creating user."});
