@@ -11,7 +11,7 @@ const productSchema = new mongoose.Schema({
     price: {type: Number, required: true},
     quantity: {type: Number, validate: {validator: Number.isInteger},required: true},
     categories: {type: [String], required: true},
-    isAvailableForSale:{type: Boolean, required: true}
+    available:{type: Boolean, required: true}
 });
 
 module.exports = mongoose.model('Product', productSchema);
