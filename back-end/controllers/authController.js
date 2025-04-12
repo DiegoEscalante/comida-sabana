@@ -46,7 +46,7 @@ const login = async (req, res) => {
 };
 
 const signup = async (req, res) => {
-    const {id, email, password, name, lastName, role, restaurantId} = req.body;
+    const {id, email, password, name, lastName} = req.body;
     
     try{
 
@@ -57,8 +57,8 @@ const signup = async (req, res) => {
         if (!email.endsWith("@unisabana.edu.co")){
             return res.status(400).json({error: "Only @unisabana.edu.co emails are allowed."});
         }
-
-        const newUser = new User({id, email, password, name, lastName, role, restaurantId}); 
+        // Every new user starts as client with no assigned restaurant. It can be changed in the database if user is pos.
+        const newUser = new User({id, email, password, name, lastName, role: 'client', restaurantId: 0}); 
         await newUser.save(); //At this point the .pre('save') middleware is triggered
         const accessToken = generateAccessToken(newUser);
         const refreshToken = generateRefreshToken(newUser);        
