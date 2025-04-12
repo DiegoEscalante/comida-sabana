@@ -19,5 +19,6 @@ app.use(cookieParser());
 
 // Mount routes
 app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/s3', require('./routes/s3Routes'));
 
 module.exports = app; // Vercel uses this to use the Express app as handler for HTTP Requests

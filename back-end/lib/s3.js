@@ -9,7 +9,7 @@ const s3 = new S3Client({
     }
 });
 
-async function generateUploadURL(filename) {
+async function generateUploadURL(filename) { //Generates a URL so that the front can upload images to our comida-saban-images bucket in S3
     const command = new PutObjectCommand({
     Bucket: "comida-sabana-images",
     Key: filename,
