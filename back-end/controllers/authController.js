@@ -103,7 +103,7 @@ const refreshToken = async (req, res) => {
     }
 }
 
-const logout = async (res) => {
+const logout = async (req, res) => {
     try{
         res.clearCookie('accessToken', {
             httpOnly: true,
@@ -118,7 +118,7 @@ const logout = async (res) => {
             .status(204).json({message: 'Logout successful.'});
     } catch(error){
         console.error(error);
-        res.status(500).json({ error: 'Error loging out user.'})
+        res.status(500).json({ error: 'Error loging out user.'});
     }
 }
 
