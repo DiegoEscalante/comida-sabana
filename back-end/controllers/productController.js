@@ -10,6 +10,10 @@ const createProduct = async (req, res) => {
         await newProduct.save();
         res.status(201).json(newProduct);
     } catch (error) {
+        console.error(error); // Log the error for debugging
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ error: 'Validation error', details: error.message });
+        } // If the error is a validation error, return a 400 status code with the error message.
         res.status(500).json({ error: "Error creating product." });
     }
 };
