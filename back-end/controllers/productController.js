@@ -1,4 +1,4 @@
-const Product = require('../models/productModel');
+const Product = require('../models/Product');
 const parseS3Link = require('../lib/parseS3Link');
 
 const createProduct = async (req, res) => {
