@@ -6,7 +6,7 @@ const createProduct = async (req, res) => {
     const restaurantId = req.user.restaurantId; //Gets restaurantId from the user object in the request
     const cleanedImageUrl = parseS3Link(imageUrl); //Parse the S3 link to get the correct URL
     try {
-        const newProduct = new Product({ name, description, price, restaurantId, image:cleanedImageUrl, quantity, categories, available});
+        const newProduct = new Product({ name, description, price, restaurantId, imageUrl:cleanedImageUrl, quantity, categories, available});
         await newProduct.save();
         res.status(201).json(newProduct);
     } catch (error) {
@@ -23,7 +23,7 @@ const updateProduct = async (req, res) => {
     }
     const cleanedImageUrl = (imageUrl !== existingProduct.image) ? parseS3Link(imageUrl) : existingProduct.image; // Parse only if the image URL changed
     try {
-        const updatedProduct = await Product.findByIdAndUpdate(productId, { name, description, price, image:cleanedImageUrl, quantity, categories, available}, { new: true }); // Return the updated product
+        const updatedProduct = await Product.findByIdAndUpdate(productId, { name, description, price, imageUrl:cleanedImageUrl, quantity, categories, available}, { new: true }); // Return the updated product
         if (!updatedProduct) {
             return res.status(404).json({ message: 'Product not found' });
         }
