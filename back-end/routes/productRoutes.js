@@ -4,7 +4,7 @@ const authenticate = require('../middlewares/authenticate');
 const authorize = require('../middlewares/authorize');
 const router = express.Router();
 
-router.get('/', authenticate, productController.getAllProducts); 
+router.get('/', authenticate, productController.getProducts); 
 router.get('/restaurant/:restaurantId', authenticate, productController.getProductsByRestaurantId); 
 router.get('/:id', authenticate, productController.getProductById);
 router.post('/', authenticate, authorize('pos'), productController.createProduct); //Only pos can create products
