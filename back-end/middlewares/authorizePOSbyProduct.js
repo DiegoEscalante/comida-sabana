@@ -3,7 +3,7 @@ const Product = require('../models/Product');
 const authorizePOSByProduct = async (req, res, next) => {
   try {
     const user = req.user;
-    const productId = req.params.productId;
+    const productId = req.params.id;
 
     const product = await Product.findById(productId);
     if (!product) {
