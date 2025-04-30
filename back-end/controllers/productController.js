@@ -38,22 +38,24 @@ const updateProduct = async (req, res) => {
 }
 
 const getProducts = async (req, res) => {
-    const productsPerRestaurant = 5; // Define the number of products to return per restaurant
-    try { 
-        const products = await Product.aggregate([{$group: {_id: "$restaurantId", products: { $push: "$$ROOT" }}}, // Group products by restaurantId, 
+    const productsPerRestaurant = 5; // Number of products to return per restaurant
+    try {
+        const products = await Product.aggregate([
+            { $match: { available: true } }, // Only available products
+            {
+                $group: {
+                    _id: "$restaurantId",
+                    products: { $push: "$$ROOT" }
+                }
+            },
             {
                 $project: {
                     _id: 1,
                     products: { $slice: ["$products", productsPerRestaurant] }
-                } // Limit the number of products per restaurant returned.
+                }
             }
         ]);
-
-        if (!products || products.length === 0) {
-            return res.status(404).json({ message: 'Products not found' });
-        } // If no products are found, return a 404 error.
-
-        res.status(200).json(products);
+        res.status(products.length ? 200 : 404).json(products.length ? products : { message: 'Products not found' });
     } catch (error) {
         res.status(500).json({ error: "Error fetching products." });
     }
@@ -72,11 +74,24 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-const getProductsByRestaurantId = async (req, res) => {
-    const restaurantId = req.params.restaurantId; //Gets restaurantId from the URL parameters
+const getAvailableProductsByRestaurantId = async (req, res) => {
+    const restaurantId = req.params.restaurantId;
+    try {
+        const products = await Product.find({ restaurantId, available: true });
+        if (!products || products.length === 0) {
+            return res.status(404).json({ message: 'No available products found' });
+        }
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ error: "Error fetching available products." });
+    }
+};
+
+const getAllProductsByRestaurantId = async (req, res) => {
+    const restaurantId = req.params.restaurantId;
     try {
         const products = await Product.find({ restaurantId });
-        if (!products) {
+        if (!products || products.length === 0) {
             return res.status(404).json({ message: 'Products not found' });
         }
         res.status(200).json(products);
@@ -100,4 +115,4 @@ const getProductById = async (req, res) => {
 
 
 
-module.exports = {getProductsByRestaurantId, getProducts, updateProduct, deleteProduct, getProductById, createProduct};
+module.exports = {getAvailableProductsByRestaurantId, getAllProductsByRestaurantId, getProducts, updateProduct, deleteProduct, getProductById, createProduct};
