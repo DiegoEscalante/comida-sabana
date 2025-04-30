@@ -19,9 +19,11 @@ const createProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-    const { productId } = req.params; //Gets productId from the URL parameters
+    const  productId  = req.params.id; //Gets productId from the URL parameters
     const { name, description, price, imageUrl, quantity, categories, available } = req.body; 
+    console.log(productId);
     const existingProduct = await Product.findById(productId); // Fetch the existing product to retain restaurantId
+    console.log(existingProduct);
     if (!existingProduct) {
         return res.status(404).json({ error: 'Product not found' });
     }
