@@ -25,7 +25,7 @@ const updateProduct = async (req, res) => {
     if (!existingProduct) {
         return res.status(404).json({ error: 'Product not found' });
     }
-    const cleanedImageUrl = (imageUrl && imageUrl !== existingProduct.imageUrl) ? parseS3Link(imageUrl) : existingProduct.imageUrl; // Parse only if the image URL changed
+    const cleanedImageUrl = (imageUrl && imageUrl !== existingProduct.imageUrl) ? parseS3Link(imageUrl) : existingProduct.imageUrl; // Parse only if the image URL changed (REVIEW THIS LOGIC)
     try {
         const updatedProduct = await Product.findByIdAndUpdate(productId, { name, description, price, imageUrl:cleanedImageUrl, quantity, categories, available}, { new: true }); // Return the updated product
         if (!updatedProduct) {
@@ -60,7 +60,7 @@ const getProducts = async (req, res) => {
 };
 
 const deleteProduct = async (req, res) => {
-    const { productId } = req.params; //Gets productId from the URL parameters
+    const  productId  = req.params.id; //Gets productId from the URL parameters
     try {
         const deletedProduct = await Product.findByIdAndDelete(productId); // Deletes the product by its ID
         if (!deletedProduct) {
@@ -86,7 +86,7 @@ const getProductsByRestaurantId = async (req, res) => {
 };
 
 const getProductById = async (req, res) => {
-    const { productId } = req.params; //Gets productId from the URL parameters
+    const  productId  = req.params.id; //Gets productId from the URL parameters
     try {
         const product = await Product.findById(productId);
         if (!product) {
