@@ -5,7 +5,8 @@ const generateAccessToken = (user) => {
         {
             id: user._id,
             email: user.email,
-            role: user.role
+            role: user.role,
+            restaurantId: user.restaurantId,
         }, process.env.JWT_ACCESS_SECRET, {expiresIn: '1h'}
     );
 };
