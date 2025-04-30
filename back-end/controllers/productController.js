@@ -73,7 +73,7 @@ const deleteProduct = async (req, res) => {
 };
 
 const getProductsByRestaurantId = async (req, res) => {
-    const { restaurantId } = req.params; //Gets restaurantId from the URL parameters
+    const restaurantId = req.params.restaurantId; //Gets restaurantId from the URL parameters
     try {
         const products = await Product.find({ restaurantId });
         if (!products) {
