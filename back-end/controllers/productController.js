@@ -19,7 +19,7 @@ const createProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-    const { productId } = req.params; //Gets productId from the URL parameters
+    const  productId  = req.params.id; //Gets productId from the URL parameters
     const { name, description, price, imageUrl, quantity, categories, available } = req.body; 
     console.log(productId);
     const existingProduct = await Product.findById(productId); // Fetch the existing product to retain restaurantId
@@ -27,7 +27,7 @@ const updateProduct = async (req, res) => {
     if (!existingProduct) {
         return res.status(404).json({ error: 'Product not found' });
     }
-    const cleanedImageUrl = (imageUrl !== existingProduct.image) ? parseS3Link(imageUrl) : existingProduct.image; // Parse only if the image URL changed
+    const cleanedImageUrl = (imageUrl !== existingProduct.imageUrl) ? parseS3Link(imageUrl) : existingProduct.imageUrl; // Parse only if the image URL changed
     try {
         const updatedProduct = await Product.findByIdAndUpdate(productId, { name, description, price, imageUrl:cleanedImageUrl, quantity, categories, available}, { new: true }); // Return the updated product
         if (!updatedProduct) {
