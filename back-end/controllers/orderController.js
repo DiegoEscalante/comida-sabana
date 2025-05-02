@@ -32,6 +32,7 @@ const createOrder = async (req, res) => {
 const getOrders = async (req, res) => {
     try {
         const orders = await Order.find()
+            .sort({ creationDate: -1 })
             .populate('userId', 'name')
             .populate('products.productId', 'name price')
             .populate('restaurantId', 'name');
@@ -46,6 +47,7 @@ const getOrdersByRestaurant = async (req, res) => {
     try {
         const { restaurantId } = req.params;
         const orders = await Order.find({ restaurantId })
+            .sort({ creationDate: -1 })
             .populate('userId', 'name')
             .populate('products.productId', 'name price')
             .populate('restaurantId', 'name');
@@ -57,22 +59,35 @@ const getOrdersByRestaurant = async (req, res) => {
 };
 
 const updateOrderStatus = async (req, res) => {
+    const allowedStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'];
     try {
         const { orderId } = req.params;
-        const { status, finishedDate, deliveredDate } = req.body;
+        const { status, preparationStartDate, finishedDate, deliveredDate } = req.body;
         const order = await Order.findById(orderId);
 
         if (!order) return res.status(404).json({ message: 'Orden no encontrada.' });
 
-        if (status) order.status = status;
+        if (status) {
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({ message: 'Estado inválido.' });
+        }
+
+        if (status === 'cancelled' && !['pending', 'confirmed', 'preparing'].includes(order.status)) {
+            return res.status(400).json({ message: 'Solo se puede cancelar si la orden está en estado pending, confirmed o preparing.' });
+        }
+
+        order.status = status;
+    }
+        if (preparationStartDate) order.preparationStartDate = new Date(preparationStartDate);
+
         if (finishedDate) {
             order.finishedDate = new Date(finishedDate);
 
-            const tiempoEntrega = calcularTiempoEntrega(order.creationDate, order.finishedDate);
-            if (tiempoEntrega !== null) {
+            const deliveryTime = calculateDeliveryTime(order.preparationStartDate, order.finishedDate);
+            if (deliveryTime !== null) {
                 const restaurant = await Restaurant.findById(order.restaurantId);
                 if (restaurant) {
-                    restaurant.averageDeliveryTime = ((restaurant.averageDeliveryTime * restaurant.numberOfDeliveries) + tiempoEntrega) / (restaurant.numberOfDeliveries + 1);
+                    restaurant.averageDeliveryTime = ((restaurant.averageDeliveryTime * restaurant.numberOfDeliveries) + deliveryTime) / (restaurant.numberOfDeliveries + 1);
                     restaurant.numberOfDeliveries += 1;
                     await restaurant.save();
                 }
@@ -89,5 +104,29 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
-module.exports = { createOrder, getOrders, getOrdersByRestaurant, updateOrderStatus };
+const allowedStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'];
 
+const putOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { status } = req.body;
+
+        const order = await Order.findById(orderId);
+        if (!order) return res.status(404).json({ message: 'Orden no encontrada.' });
+
+        if (status) {
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({ message: 'Estado inválido.' });
+        }
+        order.status = status;
+    }
+        await order.save();
+
+        res.status(200).json({ message: 'Estado actualizado correctamente.', order });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al actualizar el estado de la orden.' });
+    }
+};
+
+module.exports = { createOrder, getOrders, getOrdersByRestaurant, updateOrderStatus, putOrderStatus };
