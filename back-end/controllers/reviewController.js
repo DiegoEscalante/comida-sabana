@@ -52,5 +52,32 @@ const createReview = async (req, res) => {
     }
 };
 
+const getAllReviews = async (req, res) => {
+    try {
+        const reviews = await Review.find()
+            .populate('userId', 'name') 
+            .sort({ createdAt: -1 });   
 
-module.exports = {createReview};
+        res.status(200).json(reviews);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al obtener las reseñas.' });
+    }
+};
+
+const getReviewsWithComment = async (req, res) => {
+    try {
+        const reviews = await Review.find({
+            comment: { $exists: true, $ne: '' }
+        })
+            .populate('userId', 'name')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json(reviews);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al obtener las reseñas con comentario.' });
+    }
+};
+
+module.exports = {createReview, getAllReviews, getReviewsWithComment};
