@@ -1,5 +1,6 @@
 const Order = require('../models/Order');
 const Restaurant = require('../models/Restaurant');
+const Product = require('../models/Product')
 
 const calculateDeliveryTime = (inicio, fin) => {
     if (!(inicio instanceof Date) || !(fin instanceof Date)) return null;
