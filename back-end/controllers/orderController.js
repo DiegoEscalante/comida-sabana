@@ -102,8 +102,8 @@ const updateOrderStatus = async (req, res) => {
                 const deliveryTime = calculateDeliveryTime(order.reservationDate, order.finishedDate);
                 const restaurant = await Restaurant.findById(order.restaurantId);
                 if (restaurant) {
-                    restaurant.averageDeliveryTime =
-                    ((restaurant.averageDeliveryTime * restaurant.numberOfDeliveries) + deliveryTime)
+                    restaurant.estimatedTime =
+                    ((restaurant.estimatedTime * restaurant.numberOfDeliveries) + deliveryTime)
                     / (restaurant.numberOfDeliveries + 1);
         
                     restaurant.numberOfDeliveries += 1;
