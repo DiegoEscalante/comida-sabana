@@ -3,12 +3,6 @@ const Restaurant = require('../models/Restaurant');
 const updateProductStock = require('../lib/updateProductStock')
 const calculateDeliveryTime = require('.../lib/calculateDeliveryTime')
 
-const calculateDeliveryTime = (inicio, fin) => {
-    if (!(inicio instanceof Date) || !(fin instanceof Date)) return null;
-    const diffMs = fin.getTime() - inicio.getTime();
-    return parseFloat((diffMs / 60000).toFixed(2)); // minutos
-};
-
 const createOrderClient = async (req, res) => {
     try {
         const { products, restaurantId, reservationDate } = req.body;
@@ -105,7 +99,7 @@ const updateOrderStatus = async (req, res) => {
             order.finishedDate = now;
             // Calcular tiempo de entrega
             if (order.scheduledStartDate && order.finishedDate) {
-                const deliveryTime = calculateDeliveryTime(order.preparationStartDate, order.finishedDate);
+                const deliveryTime = calculateDeliveryTime(order.scheduledDate, order.finishedDate);
                 const restaurant = await Restaurant.findById(order.restaurantId);
                 if (restaurant) {
                     restaurant.averageDeliveryTime =
