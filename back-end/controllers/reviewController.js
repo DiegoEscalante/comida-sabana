@@ -8,8 +8,6 @@ const createReview = async (req, res) => {
     try {
         const { userId, restaurantId, orderId, score, comment } = req.body;
 
-        // Aquí ya no es necesario validar ObjectId ni score porque lo hace el middleware
-
         // Verificar existencia de entidades
         const [user, restaurant, order] = await Promise.all([
             User.findById(userId),
@@ -32,9 +30,20 @@ const createReview = async (req, res) => {
             return res.status(409).json({ message: 'Ya existe una reseña para esta orden.' });
         }
 
+        // Crear y guardar reseña
         const review = new Review({ userId, restaurantId, orderId, score, comment });
         const savedReview = await review.save();
 
+        // 🔁 ACTUALIZAR número de reseñas y score promedio del restaurante
+        const newTotalReviews = restaurant.numberOfReviews + 1;
+        const newAverageScore = ((restaurant.averageScore * restaurant.numberOfReviews) + score) / newTotalReviews;
+
+        restaurant.numberOfReviews = newTotalReviews;
+        restaurant.averageScore = newAverageScore;
+
+        await restaurant.save();
+
+        // 🔚 Enviar respuesta
         res.status(201).json(savedReview);
 
     } catch (error) {
