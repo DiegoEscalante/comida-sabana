@@ -9,6 +9,15 @@ const orderValidationSchema = checkSchema({
       errorMessage: 'Invalid restaurant ID.',
     },
   },
+  reservationDate: {
+    custom: {
+      options: (value) => {
+        const date = new Date(value);
+        return !isNaN(date.getTime()) && date > new Date();
+      },
+      errorMessage: 'Reservation date must be a valid future date.',
+    },
+  },
   products: {
     isArray: {
       options: { min: 1 },
@@ -25,16 +34,6 @@ const orderValidationSchema = checkSchema({
     isInt: {
       options: { min: 1 },
       errorMessage: 'Quantity must be a positive integer.',
-    },
-  },
-  reservationDate: {
-    optional: true,
-    custom: {
-      options: (value) => {
-        const date = new Date(value);
-        return !isNaN(date.getTime());
-      },
-      errorMessage: 'Invalid reservation date.',
     },
   },
 });
@@ -75,14 +74,6 @@ const validateOrder = async (req, res, next) => {
 
       totalPrice += product.price * quantity;
       mergedProducts.push({ productId, quantity });
-    }
-
-    if (reservationDate) {
-      const now = new Date();
-      const reservation = new Date(reservationDate);
-      if (reservation < now) {
-        return res.status(400).json({ message: 'Reservation date cannot be in the past.' });
-      }
     }
 
     req.body.products = mergedProducts;

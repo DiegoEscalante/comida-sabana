@@ -16,7 +16,7 @@ const orderSchema = new mongoose.Schema({
         default: 'pending'
     },
     creationDate: { type: Date, default: Date.now },
-    reservationDate: { type: Date },
+    reservationDate: { type: Date, required: true },
     preparationStartDate: { type: Date },
     finishedDate: { type: Date },
     deliveredDate: { type: Date }
