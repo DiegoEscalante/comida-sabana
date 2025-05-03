@@ -1,7 +1,7 @@
 const Order = require('../models/Order');
 const Restaurant = require('../models/Restaurant');
 const updateProductStock = require('../lib/updateProductStock')
-const calculateDeliveryTime = require('.../lib/calculateDeliveryTime')
+const calculateDeliveryTime = require('../lib/calculateDeliveryTime')
 
 const createOrderClient = async (req, res) => {
     try {
