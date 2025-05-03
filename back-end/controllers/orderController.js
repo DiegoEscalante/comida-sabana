@@ -98,8 +98,8 @@ const updateOrderStatus = async (req, res) => {
         if (status === 'ready' && !order.finishedDate) {
             order.finishedDate = now;
             // Calcular tiempo de entrega
-            if (order.scheduledStartDate && order.finishedDate) {
-                const deliveryTime = calculateDeliveryTime(order.scheduledDate, order.finishedDate);
+            if (order.reservationDate && order.finishedDate) {
+                const deliveryTime = calculateDeliveryTime(order.reservationDate, order.finishedDate);
                 const restaurant = await Restaurant.findById(order.restaurantId);
                 if (restaurant) {
                     restaurant.averageDeliveryTime =
