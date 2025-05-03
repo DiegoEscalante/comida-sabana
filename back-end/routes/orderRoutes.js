@@ -11,8 +11,6 @@ router.post('/client', authenticate, authorize('client'), orderValidationSchemaC
 router.post('/pos', authenticate, authorize('pos'), orderValidationSchemaPOS, validateOrder, orderController.createOrderPOS);
 router.get('/restaurant/:restaurantId', authenticate, authorize('pos'), authorizePOSByRestaurant, orderController.getOrdersByRestaurant);
 router.get('/', authenticate, orderController.getOrders);
-
-router.patch('/:orderId', orderController.updateOrderStatus);
-router.put('/:orderId/status', authenticate, authorize('pos'), orderController.putOrderStatus);
+router.patch('/:orderId/status', authenticate, authorize('pos'), orderController.update);
 
 module.exports = router;

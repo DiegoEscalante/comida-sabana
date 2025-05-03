@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const Restaurant = require('../models/Restaurant');
 const updateProductStock = require('../lib/updateProductStock')
+const calculateDeliveryTime = require('.../lib/calculateDeliveryTime')
 
 const calculateDeliveryTime = (inicio, fin) => {
     if (!(inicio instanceof Date) || !(fin instanceof Date)) return null;
@@ -84,43 +85,44 @@ const getOrdersByRestaurant = async (req, res) => {
 
 const updateOrderStatus = async (req, res) => {
     const allowedStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'];
+    const validCancelFrom = ['pending', 'confirmed', 'preparing'];
+
     try {
         const { orderId } = req.params;
-        const { status, preparationStartDate, finishedDate, deliveredDate } = req.body;
+        const { status } = req.body;
         const order = await Order.findById(orderId);
-
         if (!order) return res.status(404).json({ message: 'Orden no encontrada.' });
-
-        if (status) {
-        if (!allowedStatuses.includes(status)) {
+        if (!status || !allowedStatuses.includes(status)) {
             return res.status(400).json({ message: 'Estado inválido.' });
         }
-
-        if (status === 'cancelled' && !['pending', 'confirmed', 'preparing'].includes(order.status)) {
+        // Restricción de cancelación
+        if (status === 'cancelled' && !validCancelFrom.includes(order.status)) {
             return res.status(400).json({ message: 'Solo se puede cancelar si la orden está en estado pending, confirmed o preparing.' });
         }
-
-        order.status = status;
-    }
-        if (preparationStartDate) order.preparationStartDate = new Date(preparationStartDate);
-
-        if (finishedDate) {
-            order.finishedDate = new Date(finishedDate);
-
-            const deliveryTime = calculateDeliveryTime(order.preparationStartDate, order.finishedDate);
-            if (deliveryTime !== null) {
+        // Lógica para fechas según el nuevo estado
+        const now = new Date();
+        if (status === 'ready' && !order.finishedDate) {
+            order.finishedDate = now;
+            // Calcular tiempo de entrega
+            if (order.scheduledStartDate && order.finishedDate) {
+                const deliveryTime = calculateDeliveryTime(order.preparationStartDate, order.finishedDate);
                 const restaurant = await Restaurant.findById(order.restaurantId);
                 if (restaurant) {
-                    restaurant.averageDeliveryTime = ((restaurant.averageDeliveryTime * restaurant.numberOfDeliveries) + deliveryTime) / (restaurant.numberOfDeliveries + 1);
+                    restaurant.averageDeliveryTime =
+                    ((restaurant.averageDeliveryTime * restaurant.numberOfDeliveries) + deliveryTime)
+                    / (restaurant.numberOfDeliveries + 1);
+        
                     restaurant.numberOfDeliveries += 1;
                     await restaurant.save();
                 }
             }
         }
-
-        if (deliveredDate) order.deliveredDate = new Date(deliveredDate);
-
+        if (status === 'delivered') {
+            order.deliveredDate = now;
+        }
+        order.status = status;
         await order.save();
+
         res.status(200).json({ message: 'Estado de la orden actualizado.', order });
     } catch (error) {
         console.error(error);
@@ -128,29 +130,6 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
-const allowedStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'delivered', 'cancelled'];
 
-const putOrderStatus = async (req, res) => {
-    try {
-        const { orderId } = req.params;
-        const { status } = req.body;
 
-        const order = await Order.findById(orderId);
-        if (!order) return res.status(404).json({ message: 'Orden no encontrada.' });
-
-        if (status) {
-        if (!allowedStatuses.includes(status)) {
-            return res.status(400).json({ message: 'Estado inválido.' });
-        }
-        order.status = status;
-    }
-        await order.save();
-
-        res.status(200).json({ message: 'Estado actualizado correctamente.', order });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error al actualizar el estado de la orden.' });
-    }
-};
-
-module.exports = { createOrderClient, createOrderPOS, getOrders, getOrdersByRestaurant, updateOrderStatus, putOrderStatus };
+module.exports = { createOrderClient, createOrderPOS, getOrders, getOrdersByRestaurant, updateOrderStatus, };
