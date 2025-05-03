@@ -99,7 +99,14 @@ const validateOrder = async (req, res, next) => {
     const { products, restaurantId } = req.body;
     const productMap = new Map();
 
+    // Validar cantidades positivas y acumular por productId
     for (const { productId, quantity } of products) {
+      if (typeof quantity !== 'number' || quantity <= 0) {
+        return res.status(400).json({
+          message: `Invalid quantity "${quantity}" for product ${productId}. Quantity must be a positive number.`,
+        });
+      }
+
       const key = productId.toString();
       if (productMap.has(key)) {
         productMap.get(key).quantity += quantity;
@@ -121,6 +128,12 @@ const validateOrder = async (req, res, next) => {
       }
       if (product.restaurantId.toString() !== restaurantId) {
         return res.status(400).json({ message: `Product "${product.name}" does not belong to the specified restaurant.` });
+      }
+      // Check for stock
+      if (product.stock !== undefined && product.stock < quantity) {
+        return res.status(400).json({
+          message: `Not enough stock for product "${product.name}". Requested: ${quantity}, Available: ${product.stock}`,
+        });
       }
 
       totalPrice += product.price * quantity;
