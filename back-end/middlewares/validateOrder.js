@@ -2,7 +2,55 @@ const { checkSchema, validationResult } = require('express-validator');
 const { Types } = require('mongoose');
 const Product = require('../models/Product');
 
-const orderValidationSchema = checkSchema({
+const orderValidationSchemaPOS = checkSchema({
+  userId: {
+    custom: {
+      options: (value) => Types.ObjectId.isValid(value),
+      errorMessage: 'Invalid user ID.',
+    },
+  },
+  restaurantId: {
+    custom: {
+      options: (value) => Types.ObjectId.isValid(value),
+      errorMessage: 'Invalid restaurant ID.',
+    },
+  },
+  reservationDate: {
+    custom: {
+      options: (value) => {
+        const date = new Date(value);
+        return !isNaN(date.getTime()) && date > new Date();
+      },
+      errorMessage: 'Reservation date must be a valid future date.',
+    },
+  },
+  products: {
+    isArray: {
+      options: { min: 1 },
+      errorMessage: 'The order must include at least one product.',
+    },
+  },
+  'products.*.productId': {
+    custom: {
+      options: (value) => Types.ObjectId.isValid(value),
+      errorMessage: 'Invalid product ID.',
+    },
+  },
+  'products.*.quantity': {
+    isInt: {
+      options: { min: 1 },
+      errorMessage: 'Quantity must be a positive integer.',
+    },
+  },
+});
+
+const orderValidationSchemaClient = checkSchema({
+  userId: {
+    custom: {
+      options: (value, { req }) => !value, // should not be present
+      errorMessage: 'Client orders must not contain userId. It is derived from token.',
+    },
+  },
   restaurantId: {
     custom: {
       options: (value) => Types.ObjectId.isValid(value),
@@ -41,11 +89,14 @@ const orderValidationSchema = checkSchema({
 const validateOrder = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ message: 'Invalid data', errors: errors.array() });
+    return res.status(400).json({
+      message: 'Invalid order data.',
+      errors: errors.array().map(e => ({ field: e.param, message: e.msg })),
+    });
   }
 
   try {
-    const { products, restaurantId, reservationDate } = req.body;
+    const { products, restaurantId } = req.body;
     const productMap = new Map();
 
     for (const { productId, quantity } of products) {
@@ -85,7 +136,4 @@ const validateOrder = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  orderValidationSchema,
-  validateOrder,
-};
+module.exports = { orderValidationSchemaPOS, orderValidationSchemaClient, validateOrder };

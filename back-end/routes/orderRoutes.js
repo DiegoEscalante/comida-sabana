@@ -6,8 +6,9 @@ const authorize = require('../middlewares/authorize');
 const authenticate = require('../middlewares/authenticate');
 
 
-router.post('/', orderValidationSchema, validateOrder, orderController.createOrder);
-router.get('/', orderController.getOrders);
+router.post('/client', authenticate, authorize('client'), orderValidationSchema, validateOrder, orderController.createOrderClient);
+router.post('/pos', authenticate, authorize('pos'), orderValidationSchema, validateOrder, orderController.createOrderPOS);
+router.get('/', authenticate, orderController.getOrders);
 router.get('/restaurant/:restaurantId', orderController.getOrdersByRestaurant);
 router.patch('/:orderId', orderController.updateOrderStatus);
 router.put('/:orderId/status', authenticate, authorize('pos'), orderController.putOrderStatus);

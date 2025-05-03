@@ -1,6 +1,6 @@
 const Order = require('../models/Order');
 const Restaurant = require('../models/Restaurant');
-const Product = require('../models/Product')
+const updateProductStock = require('../lib/updateProductStock')
 
 const calculateDeliveryTime = (inicio, fin) => {
     if (!(inicio instanceof Date) || !(fin instanceof Date)) return null;
@@ -8,7 +8,7 @@ const calculateDeliveryTime = (inicio, fin) => {
     return parseFloat((diffMs / 60000).toFixed(2)); // minutos
 };
 
-const createOrder = async (req, res) => {
+const createOrderClient = async (req, res) => {
     try {
         const { userId, products, restaurantId, reservationDate } = req.body;
         const totalPrice = req.validatedTotalPrice;
@@ -20,13 +20,35 @@ const createOrder = async (req, res) => {
             totalPrice,
             reservationDate
         });
-
-        await newOrder.save();
-        res.status(201).json({ message: 'Orden creada exitosamente.', order: newOrder });
+        await updateProductStock(products);
+        const savedOrder = await newOrder.save();
+        res.status(201).json(savedOrder);
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error al crear la orden.' });
+        res.status(500).json({ message: 'Error creating order.' });
+    }
+};
+
+
+const createOrderPOS = async (req, res) => {
+    try {
+        const { userId, restaurantId, reservationDate, products } = req.body;
+
+        const newOrder = new Order({
+        userId,
+        restaurantId,
+        reservationDate,
+        products,
+        status: 'confirmed',
+        total: req.validatedTotalPrice,
+    });
+        await updateProductStock(products);
+        const savedOrder = await newOrder.save();
+        res.status(201).json(savedOrder);
+    } catch (err) {
+        console.error('POS Order creation error:', err);
+        res.status(500).json({ message: 'Could not create POS order.' });
     }
 };
 
@@ -130,4 +152,4 @@ const putOrderStatus = async (req, res) => {
     }
 };
 
-module.exports = { createOrder, getOrders, getOrdersByRestaurant, updateOrderStatus, putOrderStatus };
+module.exports = { createOrderClient, createOrderPOS, getOrders, getOrdersByRestaurant, updateOrderStatus, putOrderStatus };
