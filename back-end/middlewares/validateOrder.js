@@ -130,9 +130,9 @@ const validateOrder = async (req, res, next) => {
         return res.status(400).json({ message: `Product "${product.name}" does not belong to the specified restaurant.` });
       }
       // Check for stock
-      if (product.stock !== undefined && product.stock < quantity) {
+      if (product.quantity !== undefined && product.quantity < quantity) {
         return res.status(400).json({
-          message: `Not enough stock for product "${product.name}". Requested: ${quantity}, Available: ${product.stock}`,
+          message: `Not enough stock for product "${product.name}". Requested: ${quantity}, Available: ${product.quantity}`,
         });
       }
 
