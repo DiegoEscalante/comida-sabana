@@ -10,7 +10,8 @@ const calculateDeliveryTime = (inicio, fin) => {
 
 const createOrderClient = async (req, res) => {
     try {
-        const { userId, products, restaurantId, reservationDate } = req.body;
+        const { products, restaurantId, reservationDate } = req.body;
+        const userId = req.user._id;
         const totalPrice = req.validatedTotalPrice;
 
         const newOrder = new Order({
