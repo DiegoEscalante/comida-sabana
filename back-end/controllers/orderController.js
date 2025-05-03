@@ -41,7 +41,7 @@ const createOrderPOS = async (req, res) => {
         reservationDate,
         products,
         status: 'confirmed',
-        total: req.validatedTotalPrice,
+        totalPrice: req.validatedTotalPrice,
     });
         await updateProductStock(products);
         const savedOrder = await newOrder.save();
