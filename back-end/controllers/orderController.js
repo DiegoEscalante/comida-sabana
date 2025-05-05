@@ -48,9 +48,10 @@ const createOrderPOS = async (req, res) => {
     }
 };
 
-const getOrders = async (req, res) => {
+const getMyOrders = async (req, res) => {
     try {
-        const orders = await Order.find()
+        const userId = req.user.id;
+        const orders = await Order.find({ userId })
             .sort({ creationDate: -1 })
             .populate('userId', 'name')
             .populate('products.productId', 'name price')
@@ -126,4 +127,4 @@ const updateOrderStatus = async (req, res) => {
 
 
 
-module.exports = { createOrderClient, createOrderPOS, getOrders, getOrdersByRestaurant, updateOrderStatus, };
+module.exports = { createOrderClient, createOrderPOS, getMyOrders, getOrdersByRestaurant, updateOrderStatus, };

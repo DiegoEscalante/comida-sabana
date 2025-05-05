@@ -10,7 +10,7 @@ const authorizePOSByRestaurant = require('../middlewares/authorizePOSbyRestauran
 router.post('/client', authenticate, authorize('client'), orderValidationSchemaClient, validateOrder, orderController.createOrderClient);
 router.post('/pos', authenticate, authorize('pos'), orderValidationSchemaPOS, validateOrder, orderController.createOrderPOS);
 router.get('/restaurant/:restaurantId', authenticate, authorize('pos'), authorizePOSByRestaurant, orderController.getOrdersByRestaurant);
-router.get('/', authenticate, orderController.getOrders);
+router.get('/mine', authenticate, orderController.getMyOrders);
 router.patch('/:orderId/status', authenticate, authorize('pos'), orderController.updateOrderStatus);
 
 module.exports = router;
