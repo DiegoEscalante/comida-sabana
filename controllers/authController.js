@@ -26,12 +26,12 @@ const login = async (req, res) => {
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure:true,
-            sameSite: 'Strict',
+            sameSite: 'None',
             maxAge: 1000*60*60, //1h
         }).cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'Strict',
+            sameSite: 'None',
             maxAge: 1000*60*60*24*30, //30d
         }).status(200).json({message: 'Login successful.', user:{
             email: user.email, 
@@ -61,12 +61,12 @@ const signup = async (req, res) => {
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure:true,
-            sameSite: 'Strict',
+            sameSite: 'None',
             maxAge: 1000*60*60, //1h
         }).cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'Strict',
+            sameSite: 'None',
             maxAge: 1000*60*60*24*30, //30d
         }).status(201).json({message: 'Signup successful', user:{email, name, lastName, role: 'client', restaurantId: 0}});
     } catch(error){
@@ -89,12 +89,12 @@ const refreshToken = async (req, res) => {
             res.cookie('accessToken', newAccessToken, {
                 httpOnly: true,
                 secure:true,
-                sameSite: 'Strict',
+                sameSite: 'None',
                 maxAge: 1000*60*60, //1h
                 }).cookie('refreshToken', newRefreshToken, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'Strict',
+                sameSite: 'None',
                 maxAge: 1000*60*60*24*30, //30d
             }).status(200).json({message: 'Token refreshed'});
         })} catch(error) {
@@ -108,12 +108,12 @@ const logout = async (req, res) => {
         res.clearCookie('accessToken', {
             httpOnly: true,
             secure:true,
-            sameSite: 'Strict',
+            sameSite: 'None',
             })
             .clearCookie('refreshToken', {
             httpOnly: true,
             secure: true,
-            sameSite: 'Strict',
+            sameSite: 'None',
             })
             .status(204).json({message: 'Logout successful.'});
     } catch(error){
