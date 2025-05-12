@@ -9,7 +9,7 @@ const authorizePOSByRestaurant = require('../middlewares/authorizePOSbyRestauran
 const router = express.Router();
 
 // GET
-router.get('/', authenticate, productController.getRestaurantsWithProducts); 
+router.get('/', authenticate, productController.getProductsWithRestaurant); 
 router.get('/restaurant/:restaurantId/public', authenticate, productController.getAvailableProductsByRestaurantId); // CHECK THIS ROUTE
 router.get('/restaurant/:restaurantId', authenticate, authorize('pos'), authorizePOSByRestaurant, productController.getAllProductsByRestaurantId);
 router.get('/:id', authenticate, productController.getProductById);
