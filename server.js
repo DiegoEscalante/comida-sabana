@@ -1,21 +1,31 @@
 require('dotenv').config(); //so that the .env can be loaded locally
+const cors = require('cors');
 const express = require('express');
 const connectDB = require('./lib/connectDB')
-const app = express();
 const cookieParser = require('cookie-parser')
 
-if (require.main === module) {
-    // Only run app.listen if this file is executed directly
-    const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`);
-    });
-}
+const app = express();
+const PORT = process.env.PORT || 3000;
+
 
 connectDB();
 
 app.use(express.json());
 app.use(cookieParser());
+
+const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || [];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true
+}));
+
 
 // Mount routes
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -26,4 +36,6 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/rev', require('./routes/reviewRoutes'));
 
-module.exports = app; // Vercel uses this to use the Express app as handler for HTTP Requests
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});

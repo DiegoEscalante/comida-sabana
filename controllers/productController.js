@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Restaurant = require('../models/Restaurant');
 const parseS3Link = require('../lib/parseS3Link');
 
 const createProduct = async (req, res) => {
@@ -61,6 +62,28 @@ const getProducts = async (req, res) => {
     }
 };
 
+const getProductsWithRestaurant = async (req, res) => {
+    const productsPerRestaurant = 5; // adjust as needed
+    try {
+        const restaurants = await Restaurant.find();
+        const results = await Promise.all(
+            restaurants.map(async (restaurant) => {
+                const products = await Product.find({
+                    restaurantId: restaurant._id,
+                    available: true
+                })
+                .limit(productsPerRestaurant);
+                
+                return { restaurant, products };
+            })
+        );
+        res.status(200).json(results);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Error fetching restaurants and products" });
+    }
+};
+
 const deleteProduct = async (req, res) => {
     const  productId  = req.params.id; //Gets productId from the URL parameters
     try {
@@ -115,4 +138,4 @@ const getProductById = async (req, res) => {
 
 
 
-module.exports = {getAvailableProductsByRestaurantId, getAllProductsByRestaurantId, getProducts, updateProduct, deleteProduct, getProductById, createProduct};
+module.exports = {getAvailableProductsByRestaurantId, getProductsWithRestaurant, getAllProductsByRestaurantId, getProducts, updateProduct, deleteProduct, getProductById, createProduct};
