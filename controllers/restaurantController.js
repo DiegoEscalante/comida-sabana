@@ -8,4 +8,4 @@ const getRestaurants =  async (req, res) =>
         res.status(500).json({ error: 'Failed to fetch restaurants' });
     }
 }
-module.exports = getRestaurants;
+module.exports = { getRestaurants };
