@@ -30,16 +30,17 @@ const createOrderClient = async (req, res) => {
 
 const createOrderPOS = async (req, res) => {
     try {
-        const { userId, restaurantId, reservationDate, products } = req.body;
+        const { name, restaurantId, reservationDate, products } = req.body;
 
         const newOrder = new Order({
-        userId,
-        restaurantId,
-        reservationDate,
-        products,
-        status: 'confirmed',
-        totalPrice: req.validatedTotalPrice,
-    });
+            name,
+            restaurantId,
+            reservationDate,
+            products,
+            status: 'confirmed',
+            totalPrice: req.validatedTotalPrice,
+        });
+
         await updateProductStock(products);
         const savedOrder = await newOrder.save();
         res.status(201).json(savedOrder);
@@ -54,7 +55,6 @@ const getMyOrders = async (req, res) => {
         const userId = req.user.id;
         const orders = await Order.find({ userId })
             .sort({ creationDate: -1 })
-            .populate('userId', 'name')
             .populate('products.productId', 'name price')
             .populate('restaurantId', 'name');
         res.status(200).json(orders);
@@ -67,14 +67,28 @@ const getMyOrders = async (req, res) => {
 const getOrdersByRestaurant = async (req, res) => {
     try {
         const { restaurantId } = req.params;
+
         const orders = await Order.find({ restaurantId })
-            .sort({ creationDate: -1 })
-            .populate('userId', 'name')
-            .populate('products.productId', 'name price')
-            .populate('restaurantId', 'name');
-        res.status(200).json(orders);
+        .sort({ creationDate: -1 })
+        .populate('userId', 'name lastName')
+        .populate('products.productId', 'name price')
+        .populate('restaurantId', 'name');
+
+        const formattedOrders = orders.map(order => {
+        const name = order.userId ? order.userId.name : order.name || null;
+        const lastName = order.userId ? order.userId.lastName || null : null;
+
+        const orderObj = order.toObject();
+        orderObj.name = name;
+        orderObj.lastName = lastName;
+
+        delete orderObj.userId;
+
+        return orderObj;
+        });
+    res.status(200).json(formattedOrders);
     } catch (error) {
-        console.error(error);
+        qconsole.error(error);
         res.status(500).json({ message: 'Error al obtener las órdenes del restaurante.' });
     }
 };
