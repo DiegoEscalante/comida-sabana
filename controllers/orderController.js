@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const Restaurant = require('../models/Restaurant');
 const updateProductStock = require('../lib/updateProductStock')
+const restoreProductStock = require('../lib/restoreProductStock');
 const calculateDeliveryTime = require('../lib/calculateDeliveryTime')
 
 const createOrderClient = async (req, res) => {
@@ -90,31 +91,35 @@ const updateOrderStatus = async (req, res) => {
         if (!status || !allowedStatuses.includes(status)) {
             return res.status(400).json({ message: 'Estado inválido.' });
         }
-        // Restricción de cancelación
-        if (status === 'cancelled' && !validCancelFrom.includes(order.status)) {
-            return res.status(400).json({ message: 'Solo se puede cancelar si la orden está en estado pending, confirmed o preparing.' });
+
+        if (status === 'cancelled') {
+            if (!validCancelFrom.includes(order.status)) {
+                return res.status(400).json({ message: 'Solo se puede cancelar si la orden está en estado pending, confirmed o preparing.' });
+            }
+            await restoreProductStock(order.products);
         }
-        // Lógica para fechas según el nuevo estado
+
         const now = new Date();
+
         if (status === 'ready' && !order.finishedDate) {
             order.finishedDate = now;
-            // Calcular tiempo de entrega
             if (order.reservationDate && order.finishedDate) {
                 const deliveryTime = calculateDeliveryTime(order.reservationDate, order.finishedDate);
                 const restaurant = await Restaurant.findById(order.restaurantId);
                 if (restaurant) {
                     restaurant.estimatedTime =
-                    ((restaurant.estimatedTime * restaurant.numberOfDeliveries) + deliveryTime)
-                    / (restaurant.numberOfDeliveries + 1);
-        
+                        ((restaurant.estimatedTime * restaurant.numberOfDeliveries) + deliveryTime)
+                        / (restaurant.numberOfDeliveries + 1);
                     restaurant.numberOfDeliveries += 1;
                     await restaurant.save();
                 }
             }
         }
+
         if (status === 'delivered') {
             order.deliveredDate = now;
         }
+
         order.status = status;
         await order.save();
 
@@ -125,6 +130,29 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
+const cancelMyOrder = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const { orderId } = req.params;
 
+        const order = await Order.findById(orderId);
+        if (!order) return res.status(404).json({ message: 'Orden no encontrada.' });
+        if (!order.userId.equals(userId)) {
+            return res.status(403).json({ message: 'No tienes permiso para cancelar esta orden.' });
+        }
+        if (!['pending', 'confirmed', 'preparing'].includes(order.status)) {
+            return res.status(400).json({ message: 'La orden no puede ser cancelada en su estado actual.' });
+        }
 
-module.exports = { createOrderClient, createOrderPOS, getMyOrders, getOrdersByRestaurant, updateOrderStatus, };
+        order.status = 'cancelled';
+        await restoreProductStock(order.products);
+        await order.save();
+
+        res.status(200).json({ message: 'Orden cancelada correctamente.', order });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al cancelar la orden.' });
+    }
+};
+
+module.exports = { createOrderClient, createOrderPOS, getMyOrders, getOrdersByRestaurant, updateOrderStatus, cancelMyOrder};
