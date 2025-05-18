@@ -8,4 +8,20 @@ const getRestaurants =  async (req, res) =>
         res.status(500).json({ error: 'Failed to fetch restaurants' });
     }
 }
-module.exports = { getRestaurants };
+
+const getRestaurantById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const restaurant = await Restaurant.findById(id);
+
+        if (!restaurant) {
+            return res.status(404).json({ error: 'Restaurant not found' });
+        }
+
+        res.json(restaurant);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch restaurant' });
+    }
+};
+
+module.exports = { getRestaurants, getRestaurantById };
