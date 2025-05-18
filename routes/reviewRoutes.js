@@ -11,6 +11,6 @@ router.get('/:restaurantId', authenticate, reviewController.getRestaurantReviews
 router.get('/with-comment', authenticate, reviewController.getReviewsWithComment); // Solo con comentarios
 
 // POST
-router.post('/reviews', authenticate, validateReview, reviewController.createReview);
+router.post('/', authenticate, validateReview, reviewController.createReview);
 
 module.exports = router;
