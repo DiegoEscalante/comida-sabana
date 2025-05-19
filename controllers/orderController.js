@@ -1,3 +1,13 @@
+const Pusher = require('pusher');
+
+const pusher = new Pusher({
+    appId: process.env.PUSHER_APP_ID,
+    key: process.env.PUSHER_KEY,
+    secret: process.env.PUSHER_SECRET,
+    cluster: process.env.PUSHER_CLUSTER,
+    useTLS: true,
+});
+
 const Order = require('../models/Order');
 const Restaurant = require('../models/Restaurant');
 const updateProductStock = require('../lib/updateProductStock')
@@ -100,7 +110,7 @@ const updateOrderStatus = async (req, res) => {
     try {
         const { orderId } = req.params;
         const { status } = req.body;
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(orderId).populate('userId', '_id'); // Populate userId to access the ID        
         if (!order) return res.status(404).json({ message: 'Orden no encontrada.' });
         if (!status || !allowedStatuses.includes(status)) {
             return res.status(400).json({ message: 'Estado inválido.' });
@@ -133,9 +143,22 @@ const updateOrderStatus = async (req, res) => {
         if (status === 'delivered') {
             order.deliveredDate = now;
         }
-
+        const previousStatus = order.status; // Store the previous status BEFORE updating it
         order.status = status;
         await order.save();
+        // Trigger Pusher event after successful status update
+        if (order.userId && order.userId._id) {
+            await pusher.trigger(
+            `user-${order.userId._id}`, // Channel name specific to the user
+            'order-status-updated',     // Event name
+            {
+            orderId: order._id,
+            newStatus: order.status,
+            previousStatus: previousStatus,
+            restaurantId: order.restaurantId
+            }
+        );
+        }
 
         res.status(200).json({ message: 'Estado de la orden actualizado.', order });
     } catch (error) {
