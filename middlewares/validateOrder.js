@@ -5,8 +5,17 @@ const Product = require('../models/Product');
 const orderValidationSchemaPOS = checkSchema({
   userId: {
     custom: {
-      options: (value) => Types.ObjectId.isValid(value),
-      errorMessage: 'Invalid user ID.',
+      options: (value) => value === undefined,
+      errorMessage: 'userId is not allowed in POS orders.',
+    },
+  },
+  name: {
+    exists: {
+      options: { checkFalsy: true },
+      errorMessage: 'Name is required for POS orders.',
+    },
+    isString: {
+      errorMessage: 'Name must be a string.',
     },
   },
   restaurantId: {
@@ -47,9 +56,15 @@ const orderValidationSchemaPOS = checkSchema({
 const orderValidationSchemaClient = checkSchema({
   userId: {
     custom: {
-      options: (value, { req }) => !value, // should not be present
-      errorMessage: 'Client orders must not contain userId. It is derived from token.',
-    },
+      options: (value) => !value,
+      errorMessage: 'Client orders must not contain userId.',
+    }
+  },
+  name: {
+    custom: {
+      options: (value) => !value,
+      errorMessage: 'Client orders must not contain a name.',
+    }
   },
   restaurantId: {
     custom: {

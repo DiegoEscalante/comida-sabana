@@ -80,4 +80,26 @@ const getReviewsWithComment = async (req, res) => {
     }
 };
 
-module.exports = {createReview, getAllReviews, getReviewsWithComment};
+const getRestaurantReviews = async (req, res) => {
+    try {
+        const { restaurantId } = req.params;
+
+        if (!Types.ObjectId.isValid(restaurantId)) {
+            return res.status(400).json({ message: 'ID de restaurante inválido.' });
+        }
+
+        const reviews = await Review.find({
+            restaurantId,
+            comment: { $exists: true, $ne: '' }
+        })
+            .populate('userId', 'name')
+            .sort({ createdAt: -1 });
+
+        res.status(200).json(reviews);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error al obtener las reseñas del restaurante.' });
+    }
+};
+
+module.exports = {createReview, getAllReviews, getReviewsWithComment, getRestaurantReviews};
